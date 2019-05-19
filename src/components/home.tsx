@@ -1,12 +1,16 @@
 import React from 'react';
 
-//declare var alt: any;
-import '../styles/inventory.scss';
+declare var alt: any;
 
+import '../styles/inventory.scss';
+import items_data from '../items.json';
 const no_img = require('../img/image.svg');
 
-import items_data from './../items.json';
-
+//@ts-ignore
+var req = require.context("../img/item_icons", true, /^(.*\.(png|jpe?g|svg|gif|bmp$))[^.]*$/im);
+req.keys().forEach(function(key: string) {
+	req(key);
+});
 
 function translateName(name: string) {
 	//@ts-ignore
@@ -17,8 +21,10 @@ function translateName(name: string) {
 }
 
 interface ItemSchema {
-	name: string;
+	id: number;
+	item_name: string;
 	amount: number;
+	category_name: string;
 	usable: boolean;
 }
 
@@ -55,16 +61,48 @@ export default class Home extends React.Component<any, HomeState> {
 		window.addEventListener('mouseup', this.onMouseReleased.bind(this), true);
 
 		if(process.env.NODE_ENV === 'development') {
+			let cats = Object.keys(CATEGORIES);
 			let arr: ItemSchema[] = [];
-			for(let i=0; i<100; i++) {
+			for(let i=0; i<92; i++) {
 				arr.push({
-					name: 'costam' + i, 
+					id: i,
+					item_name: Object.keys(items_data)[i], 
 					amount: (Math.random()*10000)|0, 
-					usable: Math.random() > 0.5
+					usable: Math.random() > 0.5,
+					category_name: cats[(Math.random()*cats.length)|0]
 				});
 			}
-			this.setState({items: arr});
+			this.loadItems(arr);
 		}
+		else {
+			try {
+				alt.emit('viewLoaded');
+
+				alt.on('toogle_inventory_display', (show: boolean) => {
+					let main_view = document.getElementById('main_view');
+					if(!main_view)
+						return;
+					if(show) {
+						main_view.style.display = 'block';
+						if(this.centered)
+							this.centerContainer();
+					}
+					else
+						main_view.style.display = 'none';
+				});
+
+				alt.on('loadItems', (items: ItemSchema[]) => {
+					this.loadItems(items);
+				});
+			}
+			catch(e) {
+				console.warn(e);
+			}
+		}
+	}
+
+	loadItems(items: ItemSchema[]) {
+		this.setState({items});
 	}
 
 	componentWillUnmount() {
@@ -119,7 +157,7 @@ export default class Home extends React.Component<any, HomeState> {
 	renderItemEntry(item: ItemSchema, index: number) {
 		//item.usable
 		//@ts-ignore
-		let item_dt = items_data[item.name];
+		let item_dt = items_data[item.item_name];
 		let icon = no_img;
 		if(item_dt)
 			icon = item_dt[1] || no_img;
@@ -129,7 +167,7 @@ export default class Home extends React.Component<any, HomeState> {
 				//@ts-ignore
 				e.nativeEvent.target.src = no_img;
 			}} />
-			<div className='name'>{translateName(item.name)}</div>
+			<div className='name'>{translateName(item.item_name)}</div>
 			<div className='amount'>{item.amount}</div>
 		</div>;
 	}
@@ -141,25 +179,39 @@ export default class Home extends React.Component<any, HomeState> {
 		}}>
 			<header>
 				<span onMouseDown={this.onHeaderGrab.bind(this)}></span>
-				<div onMouseDown={this.onHeaderGrab.bind(this)}>
+				<div className='title' onMouseDown={this.onHeaderGrab.bind(this)}>
 					EKWIPUNEK
 				</div>
-				<button className='closer'></button>
+				<button className='closer' onClick={() => {
+					try {
+						alt.emit('onInventoryClose');
+					}
+					catch(e) {}
+				}}></button>
 			</header>
 			<nav className='categories' style={{
 				gridTemplateColumns: Object.keys(CATEGORIES).map(()=>'1fr').join(' ')
 			}}>
 				{Object.entries(CATEGORIES).map((entry, i) => {
 					let [cat, cat_name] = entry;
-					return <button key={i} className={this.state.category === cat ? 'current' : ''} 
+					let current_cat = this.state.category === cat;
+					return <button key={i} className={current_cat ? 'current' : ''} 
 						onClick={() => this.setState({category: cat})}>{cat_name}</button>;
 				})}
 			</nav>
 			<section className='items-list'>
-				{this.state.items.map(this.renderItemEntry.bind(this))}
+				{this.state.items.length === 0 ? 'PUSTO' : this.state.items.map((item, i) => {
+					if(this.state.category === item.category_name || 
+						this.state.category === Object.keys(CATEGORIES)[0])
+					{
+						return this.renderItemEntry(item, i);
+					}
+					else
+						return undefined;
+				})}
 			</section>
 			<footer>
-				<span>Ilość przedmiotów: 69/1337</span>
+				<span>Ilość przedmiotów: {this.state.items.length}</span>
 			</footer>
 		</div>;
 	}

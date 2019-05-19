@@ -5,7 +5,7 @@ $headerH: 27px;
 	display: inline-block;
 	position: fixed;
 
-	min-width: 330px;
+	min-width: 270px;
 	
 	background-color: #37474FC0;
 	border-radius: 5px;
@@ -34,12 +34,26 @@ $headerH: 27px;
 		justify-items: stretch;
 		height: $headerH;
 		line-height: $headerH;
-		color: #B0BEC5;
 		font-weight: normal;
 		font-size: 0.85em;
 		background-color: #263238;
 		padding: 0px;
 		cursor: pointer;
+
+		.title {
+			color: #B0BEC5;
+
+			animation: wiggle 15s 2s ease-in-out infinite;
+
+			@keyframes wiggle {
+				0% 	{	transform: rotate(1deg);	}
+				1.25% {	transform: rotate(-1deg);	}
+				2.5% {	transform: rotate(1.5deg);	}
+				3.75% {	transform: rotate(-5deg);	}
+				5%	{	transform: rotate(0deg);	}
+				100%{	transform: rotate(0deg);	}
+			}
+		}
 
 		.closer {
 			content: "";
@@ -65,7 +79,7 @@ $headerH: 27px;
 			border-radius: 0px;
 			background-color: transparent;
 			&:not(.current):hover {
-				background-color: #fff2;
+				background-color: #37474F;
 			}
 
 			&.current {
@@ -76,17 +90,26 @@ $headerH: 27px;
 	}
 
 	.items-list {
-		padding: 10px 5px;
+		padding: 10px 0px;
 		max-height: calc(80vh - 150px);
 		overflow-y: auto;
 
 		.item-entry {
-			$entryH: 30px;
+			$entryH: 50px;
 
+			padding: 0px 5px;
 			display: grid;
 			grid-template-areas: "icon name amount";
-			grid-template-columns: $entryH auto 80px;
+			grid-template-columns: fit-content(100%) auto 80px;
+			align-items: stretch;
+			justify-content: stretch;
 			height: $entryH;
+			line-height: $entryH;
+			border-bottom: 1px solid #fff2;
+
+			&:nth-child(even) {
+				background-color: #fff1;
+			}
 
 			.icon {
 				grid-area: icon;
@@ -97,10 +120,11 @@ $headerH: 27px;
 			}
 			.name {
 				grid-area: name;
+				text-align: left;
+				padding-left: 10px;
 			}
 			.amount {
 				grid-area: amount;
-				padding: 5px;
 				text-align: right;
 			}
 		}
@@ -111,6 +135,8 @@ $headerH: 27px;
 		font-size: 0.8em;
 		text-align: right;
 		color: #B0BEC5;
+		border-top: 1px solid #263238;
+		background-color: #26323880;
 		// display: flex;
 		// justify-content: space-between;
 	}

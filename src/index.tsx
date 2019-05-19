@@ -5,7 +5,6 @@ import './styles/main.scss';
 
 import Home from './components/home';
 
-//declare var alt: any;
 const preview = require('./img/preview.png');
 
 if(process.env.NODE_ENV === 'development') {
@@ -14,6 +13,13 @@ if(process.env.NODE_ENV === 'development') {
 		body.style['background'] = process.env.NODE_ENV !== 'development' ? 
 			'transparent' : `url('${preview}') center no-repeat`;
 	}
+}
+else {
+	try {//turn of display by default
+		//@ts-ignore
+		document.getElementById('main_view').style.display = 'none';
+	}
+	catch(e) {}
 }
 
 //console.log(new Date(Date.now() + 1000*60*60*24*14), 
