@@ -95,7 +95,7 @@ $headerH: 27px;
 		overflow-y: auto;
 
 		.item-entry {
-			$entryH: 50px;
+			$entryH: 43px;
 
 			padding: 0px 5px;
 			display: grid;
@@ -114,7 +114,7 @@ $headerH: 27px;
 			.icon {
 				grid-area: icon;
 				height: $entryH;
-				min-width: $entryH;
+				min-width: 113px;
 				border: 0px;
 				outline: none;
 			}
@@ -122,6 +122,8 @@ $headerH: 27px;
 				grid-area: name;
 				text-align: left;
 				padding-left: 10px;
+				white-space: nowrap;
+				height: $entryH;
 			}
 			.amount {
 				grid-area: amount;
