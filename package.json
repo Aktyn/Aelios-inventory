@@ -1,0 +1,51 @@
+{
+	"name": "aelios-inventory-creator",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"page:dev": "webpack-dev-server --config ./webpack.config.js",
+		"page:build": "webpack --config ./webpack.config.js",
+		"page:w:publish": "set NODE_ENV=production && webpack --mode=production --config ./webpack.config.js -p",
+		"page:publish": "NODE_ENV='production' webpack --mode=production --config ./webpack.config.js -p"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Aktyn/Aelios-inventory.git"
+	},
+	"author": "Aktyn",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Aktyn/Aelios-inventory/issues"
+	},
+	"homepage": "https://github.com/Aktyn/Aelios-inventory#readme",
+	"devDependencies": {
+		"autoprefixer": "^9.4.3",
+		"awesome-typescript-loader": "^5.2.1",
+		"css-loader": "^2.0.1",
+		"file-loader": "^2.0.0",
+		"html-loader": "^0.5.5",
+		"html-webpack-plugin": "^3.2.0",
+		"image-webpack-loader": "^4.6.0",
+		"mini-css-extract-plugin": "^0.5.0",
+		"node-sass": "^4.11.0",
+		"postcss-loader": "^3.0.0",
+		"sass-loader": "^7.1.0",
+		"style-loader": "^0.23.1",
+		"ttf-loader": "^1.0.2",
+		"typescript": "^3.4.4",
+		"uglifyjs-webpack-plugin": "^2.0.1",
+		"webpack": "^4.28.0",
+		"webpack-cli": "^3.1.2",
+		"webpack-dev-server": "^3.1.10"
+	},
+	"dependencies": {
+		"@types/node": "^10.14.5",
+		"@types/react": "^16.7.17",
+		"@types/react-dom": "^16.0.11",
+		"@types/react-router-dom": "^4.3.2",
+		"react": "^16.6.3",
+		"react-dom": "^16.6.3",
+		"react-router-dom": "^5.0.0"
+	}
+}

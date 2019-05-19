@@ -1,0 +1,101 @@
+@font-face {
+	font-family: Asap;
+	src: url('./Asap-Regular.ttf');
+}
+
+@import 'common.scss';
+
+body, html, textarea, select, input, button, input::placeholder {
+    padding: 0px;
+    margin: 0px;
+
+    border: none;
+    outline: none;
+    color: #fff;
+    font-family: Asap, Arial;
+    font-size: 0.975em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    box-sizing: border-box;
+    vertical-align: middle;
+
+    text-shadow: 0px 0px 2px #0005;
+}
+
+body {
+    text-align: center;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 1fr;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	height: 100vh;
+    background-color: transparent;//#006064
+    background-size: 100% 100% !important;
+}
+
+button {
+	cursor: pointer;
+	border-radius: 5px;
+	box-shadow: 0px 1px 4px #0005;
+
+	// border: 1px solid #FF8A65;
+	background-color: #FF7043;
+	min-width: 110px;
+
+	font-weight: bold;
+	padding: 5px 10px;
+
+	&:hover {
+		background: #FF8A65;
+	}
+
+	&:active {
+		background-color: #FFAB91;
+		box-shadow: 0px 0px 2px #0005;
+	}
+}
+
+input, textarea, select {
+	padding: 5px 5px;
+	background: #607D8B;
+	min-width: 200px;
+	font-size: 0.9em;
+
+	border-radius: 3px;
+	border: 1px solid transparent;
+
+	transition: border-color 0.3s ease-in-out;
+
+	&::placeholder {
+		color: #B0BEC5;
+	}
+
+	&:focus {
+		border-color: #FF8A65;
+	}
+}
+
+hr {
+	outline: none;
+	border: none;
+	height: 1px;
+	background-color: #90A4AE;
+	margin: 15px 0px;
+}
+
+.home-main {
+	display: inline-grid;
+	grid-template-columns: auto auto;
+	grid-template-rows: auto;
+	grid-column-gap: 20px;
+
+	align-items: center;
+	justify-content: center;
+	
+	& > * {
+		background-color: black;
+	}
+}
