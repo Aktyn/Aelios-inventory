@@ -1,0 +1,117 @@
+$initialMargin: 20px;
+$headerH: 27px;
+
+.inventory {
+	display: inline-block;
+	position: fixed;
+
+	min-width: 330px;
+	
+	background-color: #37474FC0;
+	border-radius: 5px;
+	border: 1px solid #263238;
+	box-shadow: 0px 2px 6px #0008;
+
+	user-select: none;
+
+	opacity: 0;
+	animation: fade-in 0.5s ease-in-out forwards;
+	@keyframes fade-in {
+		0% {
+			opacity: 0;
+			transform: translateY(-50px);
+		}
+
+		100% {
+			opacity: 1;
+			transform: translateY(0px);
+		}
+	}
+
+	header {
+		display: grid;
+		grid-template-columns: $headerH auto $headerH;
+		justify-items: stretch;
+		height: $headerH;
+		line-height: $headerH;
+		color: #B0BEC5;
+		font-weight: normal;
+		font-size: 0.85em;
+		background-color: #263238;
+		padding: 0px;
+		cursor: pointer;
+
+		.closer {
+			content: "";
+			background: url('../img/close.svg') center no-repeat;
+			background-size: 61%;
+			margin: 0px;
+			padding: 0px;
+			height: $headerH;
+			width: $headerH;
+			box-shadow: none;
+			opacity: 0.6;
+			&:hover {
+				opacity: 1;
+			}
+		}
+	}
+
+	.categories {
+		display: grid;
+		background-color: #263238;
+		& > * {
+			box-shadow: none;
+			border-radius: 0px;
+			background-color: transparent;
+			&:not(.current):hover {
+				background-color: #fff2;
+			}
+
+			&.current {
+				cursor: auto;
+				background-color: #80CBC480;
+			}
+		}
+	}
+
+	.items-list {
+		padding: 10px 5px;
+		max-height: calc(80vh - 150px);
+		overflow-y: auto;
+
+		.item-entry {
+			$entryH: 30px;
+
+			display: grid;
+			grid-template-areas: "icon name amount";
+			grid-template-columns: $entryH auto 80px;
+			height: $entryH;
+
+			.icon {
+				grid-area: icon;
+				height: $entryH;
+				min-width: $entryH;
+				border: 0px;
+				outline: none;
+			}
+			.name {
+				grid-area: name;
+			}
+			.amount {
+				grid-area: amount;
+				padding: 5px;
+				text-align: right;
+			}
+		}
+	}
+
+	footer {
+		padding: 3px;
+		font-size: 0.8em;
+		text-align: right;
+		color: #B0BEC5;
+		// display: flex;
+		// justify-content: space-between;
+	}
+}

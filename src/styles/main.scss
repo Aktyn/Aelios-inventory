@@ -1,6 +1,6 @@
 @font-face {
-	font-family: Asap;
-	src: url('./Asap-Regular.ttf');
+	font-family: Roboto;
+	src: url('./Roboto-Regular.ttf');
 }
 
 @import 'common.scss';
@@ -12,7 +12,7 @@ body, html, textarea, select, input, button, input::placeholder {
     border: none;
     outline: none;
     color: #fff;
-    font-family: Asap, Arial;
+    font-family: Roboto, Arial;
     font-size: 0.975em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -43,7 +43,6 @@ button {
 
 	// border: 1px solid #FF8A65;
 	background-color: #FF7043;
-	min-width: 110px;
 
 	font-weight: bold;
 	padding: 5px 10px;
@@ -84,18 +83,4 @@ hr {
 	height: 1px;
 	background-color: #90A4AE;
 	margin: 15px 0px;
-}
-
-.home-main {
-	display: inline-grid;
-	grid-template-columns: auto auto;
-	grid-template-rows: auto;
-	grid-column-gap: 20px;
-
-	align-items: center;
-	justify-content: center;
-	
-	& > * {
-		background-color: black;
-	}
 }
