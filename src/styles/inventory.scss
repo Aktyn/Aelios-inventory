@@ -90,7 +90,7 @@ $headerH: 27px;
 	}
 
 	.items-list {
-		padding: 10px 0px;
+		padding: 0px;
 		max-height: calc(80vh - 150px);
 		overflow-y: auto;
 
@@ -109,6 +109,10 @@ $headerH: 27px;
 
 			&:nth-child(even) {
 				background-color: #fff1;
+			}
+
+			&.hovered {
+				background-color: #fff4;
 			}
 
 			.icon {

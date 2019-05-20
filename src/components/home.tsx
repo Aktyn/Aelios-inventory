@@ -37,17 +37,20 @@ interface HomeState {
 	pos: {x: number, y: number};
 	category: string;
 	items: ItemSchema[];
+	hovered_item_i: number;
 }
 
 export default class Home extends React.Component<any, HomeState> {
 	private container: HTMLDivElement | null = null;
+	private items_list: HTMLDivElement | null = null;
 	private centered = true;
 	private grabPos: {x: number, y: number} | null = null;
 
 	state: HomeState = {
 		pos: {x: 0, y: 0},
 		category: Object.keys(CATEGORIES)[0],
-		items: []
+		items: [],
+		hovered_item_i: 0
 	}
 
 	constructor(props: any) {
@@ -59,6 +62,7 @@ export default class Home extends React.Component<any, HomeState> {
 
 		window.addEventListener('mousemove', this.onMouseMove.bind(this), true);
 		window.addEventListener('mouseup', this.onMouseReleased.bind(this), true);
+		window.addEventListener('keydown', this.onKeyDown.bind(this), true);
 
 		if(process.env.NODE_ENV === 'development') {
 			let cats = Object.keys(CATEGORIES);
@@ -108,11 +112,54 @@ export default class Home extends React.Component<any, HomeState> {
 	componentWillUnmount() {
 		window.removeEventListener('mousemove', this.onMouseMove.bind(this), true);
 		window.removeEventListener('mouseup', this.onMouseReleased.bind(this), true);
+		window.removeEventListener('keydown', this.onKeyDown.bind(this), true);
 	}
 
 	componentDidUpdate() {
 		if(this.centered)
 			this.centerContainer();
+	}
+
+	onKeyDown(e: KeyboardEvent) {
+		switch(e.keyCode) {
+			case 38: //arrow up
+			case 40: {//arrow down
+				var new_hover_i = (this.state.hovered_item_i+(e.keyCode===38 ? -1 : 1));
+				let jumped = false;
+				if(new_hover_i < 0) {
+					jumped = true;
+					new_hover_i = this.state.items.length-1;
+				}
+				else if(new_hover_i >= this.state.items.length) {
+					jumped = true;
+					new_hover_i = 0;
+				}
+				this.setState({
+					hovered_item_i: new_hover_i
+				});
+				e.preventDefault();
+				let hovered: HTMLDivElement | null = document.querySelector('.item-entry.hovered');
+				if(hovered && this.items_list) {
+					if(jumped) {
+						this.items_list.scrollTop = hovered.offsetTop - 
+							(e.keyCode === 40 ? hovered.offsetHeight*1.5 : 0);
+					}
+					else if(e.keyCode === 40) {
+						this.items_list.scrollTop = Math.max(this.items_list.scrollTop,
+							hovered.offsetTop - this.items_list.offsetHeight);
+					}
+					else {
+						this.items_list.scrollTop = Math.min(this.items_list.scrollTop,
+							hovered.offsetTop - hovered.offsetHeight*1.5);
+					}
+					//console.log(this.items_list.scrollTop);
+					
+				}
+			}	break;
+			case 13://enter
+
+				break;
+		}
 	}
 
 	onMouseMove(e: MouseEvent) {
@@ -133,8 +180,6 @@ export default class Home extends React.Component<any, HomeState> {
 
 	onMouseReleased() {
 		this.grabPos = null;
-
-		//TODO - save this.state.pos to localStorage
 	}
 
 	onHeaderGrab(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
@@ -162,7 +207,10 @@ export default class Home extends React.Component<any, HomeState> {
 		if(item_dt)
 			icon = item_dt[1] || no_img;
 
-		return <div key={index} className='item-entry'>
+		return <div key={index} className={`item-entry${
+			this.state.hovered_item_i===index ? ' hovered' : ''}`} onMouseEnter={() => {
+				this.setState({hovered_item_i: index});
+			}}>
 			<img className='icon' src={icon} onError={e => {
 				//@ts-ignore
 				e.nativeEvent.target.src = no_img;
@@ -199,7 +247,7 @@ export default class Home extends React.Component<any, HomeState> {
 						onClick={() => this.setState({category: cat})}>{cat_name}</button>;
 				})}
 			</nav>
-			<section className='items-list'>
+			<div className='items-list' ref={el => this.items_list = el}>
 				{this.state.items.length === 0 ? 'PUSTO' : this.state.items.map((item, i) => {
 					if(this.state.category === item.category_name || 
 						this.state.category === Object.keys(CATEGORIES)[0])
@@ -209,7 +257,7 @@ export default class Home extends React.Component<any, HomeState> {
 					else
 						return undefined;
 				})}
-			</section>
+			</div>
 			<footer>
 				<span>Ilość przedmiotów: {this.state.items.length}</span>
 			</footer>
