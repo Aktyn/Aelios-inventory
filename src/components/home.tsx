@@ -38,11 +38,15 @@ interface HomeState {
 	category: string;
 	items: ItemSchema[];
 	hovered_item_i: number;
+	selected_i: number;
+	selected_option_i?: number;
+	removing_id?: number;
 }
 
 export default class Home extends React.Component<any, HomeState> {
 	private container: HTMLDivElement | null = null;
 	private items_list: HTMLDivElement | null = null;
+	private amount_input: HTMLInputElement | null = null;
 	private centered = true;
 	private grabPos: {x: number, y: number} | null = null;
 
@@ -50,7 +54,10 @@ export default class Home extends React.Component<any, HomeState> {
 		pos: {x: 0, y: 0},
 		category: Object.keys(CATEGORIES)[0],
 		items: [],
-		hovered_item_i: 0
+		hovered_item_i: 0,
+		selected_i: -1,
+		selected_option_i: undefined,
+		removing_id: undefined
 	}
 
 	constructor(props: any) {
@@ -106,7 +113,14 @@ export default class Home extends React.Component<any, HomeState> {
 	}
 
 	loadItems(items: ItemSchema[]) {
-		this.setState({items});
+		this.setState({items, selected_i: -1, selected_option_i: undefined});
+	}
+
+	confirmItemRemove(item: ItemSchema, amount: number) {//amount to remove
+		try {
+			alt.emit('onInventoryItemRemove', item, amount);
+		}
+		catch(e) {console.error(e);}
 	}
 
 	componentWillUnmount() {
@@ -156,8 +170,53 @@ export default class Home extends React.Component<any, HomeState> {
 					
 				}
 			}	break;
+			case 37://left
+				this.setState({selected_option_i: (this.state.selected_option_i||0)-1});
+				break;
+			case 39://right
+				this.setState({selected_option_i: (this.state.selected_option_i||0)+1});
+				break;
 			case 13://enter
+				if(this.state.selected_i === this.state.hovered_item_i && 
+					this.state.selected_option_i !== undefined) 
+				{
+					let item = this.state.items[this.state.selected_i];
 
+					if(this.state.removing_id === this.state.selected_i) {
+						if(this.state.selected_option_i === 0) {//confirm
+							if(this.amount_input)
+								this.confirmItemRemove(item, parseInt(this.amount_input.value));
+						}
+						else//cancel
+							this.setState({removing_id: undefined, selected_option_i: 0});
+					}
+
+					let option_i = this.fixOptionI(item, this.state.selected_option_i);
+					if(!item.usable)
+						option_i++;
+
+					switch (option_i) {
+						case 2:
+							this.setState({
+								removing_id: this.state.selected_i,
+								selected_option_i: 0
+							});
+							break;
+					}
+				}
+				else
+					this.setState({
+						selected_i: this.state.hovered_item_i, 
+						selected_option_i: 0,
+						removing_id: undefined
+					});
+				break;
+			case 27://esc
+				this.setState({
+					selected_i: -1, 
+					selected_option_i: undefined, 
+					removing_id: undefined
+				});
 				break;
 		}
 	}
@@ -199,6 +258,15 @@ export default class Home extends React.Component<any, HomeState> {
 			this.setState({pos: {x: new_x, y: new_y}});
 	}
 
+	private fixOptionI(item: ItemSchema, i: number, divider?: number) {
+		if(divider === undefined)
+			divider = (item.usable ? 3 : 2);
+		let option_i = i % divider;
+		if(option_i < 0)
+			option_i = divider + option_i;
+		return option_i;
+	}
+
 	renderItemEntry(item: ItemSchema, index: number) {
 		//item.usable
 		//@ts-ignore
@@ -207,10 +275,48 @@ export default class Home extends React.Component<any, HomeState> {
 		if(item_dt)
 			icon = item_dt[1] || no_img;
 
+		if(this.state.selected_i === index) {
+			if(this.state.removing_id !== undefined) {
+				let option_i = this.state.selected_option_i !== undefined ? 
+					this.fixOptionI(item, this.state.selected_option_i, 2) : -1;
+				return <div className='confirm-option removing' key={index}>
+					<input type='number' defaultValue={"1"} min={1} max={item.amount} 
+						placeholder='Ilość' ref={el => this.amount_input = el} />
+					<span style={{paddingRight: '20px'}}>/&nbsp;{item.amount}</span>
+					<button className={option_i === 0 ? 'selected': ''} onClick={() => {
+						if(!this.amount_input)
+							return;
+						this.confirmItemRemove( item, parseInt(this.amount_input.value) );
+					}}>POTWIERDŹ</button>
+					<button className={option_i === 1 ? 'selected': ''}
+						onClick={() => this.setState({removing_id: undefined})}>ANULUJ</button>
+				</div>;
+			}
+
+			let option_i = this.state.selected_option_i !== undefined ? 
+				this.fixOptionI(item, this.state.selected_option_i) : -1;
+			if(!item.usable)
+				option_i++;
+
+			return <div key={index} className='item-options' style={{
+				gridTemplateColumns: item.usable ? '1fr 1fr 1fr' : '1fr 1fr'
+			}} onMouseEnter={() => this.setState({hovered_item_i: index})} >
+				{item.usable && <button className={option_i === 0 ? 'selected': ''}>UŻYJ</button>}
+				<button className={option_i === 1 ? 'selected': ''}>PRZEKAŻ</button>
+				<button className={option_i === 2 ? 'selected': ''} 
+					onClick={() => this.setState({removing_id: index, 
+						selected_option_i: undefined})}>USUŃ</button>
+			</div>;
+		}
+
 		return <div key={index} className={`item-entry${
-			this.state.hovered_item_i===index ? ' hovered' : ''}`} onMouseEnter={() => {
-				this.setState({hovered_item_i: index});
-			}}>
+			this.state.hovered_item_i===index ? ' hovered' : ''}`} 
+				onMouseEnter={() => this.setState({hovered_item_i: index})} 
+				onClick={() => this.setState({
+					selected_i: index, 
+					selected_option_i: undefined,
+					removing_id: undefined
+				})}>
 			<img className='icon' src={icon} onError={e => {
 				//@ts-ignore
 				e.nativeEvent.target.src = no_img;

@@ -78,6 +78,7 @@ $headerH: 27px;
 			box-shadow: none;
 			border-radius: 0px;
 			background-color: transparent;
+			padding: 10px 0px;
 			&:not(.current):hover {
 				background-color: #37474F;
 			}
@@ -94,15 +95,9 @@ $headerH: 27px;
 		max-height: calc(80vh - 150px);
 		overflow-y: auto;
 
-		.item-entry {
-			$entryH: 43px;
+		$entryH: 43px;
 
-			padding: 0px 5px;
-			display: grid;
-			grid-template-areas: "icon name amount";
-			grid-template-columns: fit-content(100%) auto 80px;
-			align-items: stretch;
-			justify-content: stretch;
+		& > * {
 			height: $entryH;
 			line-height: $entryH;
 			border-bottom: 1px solid #fff2;
@@ -110,6 +105,38 @@ $headerH: 27px;
 			&:nth-child(even) {
 				background-color: #fff1;
 			}
+
+			button {
+				background-color: transparent;
+				transition: background-color 0.25s ease-in-out;
+				box-shadow: none;
+				border-radius: 0px;
+				padding: 0px;
+
+				&:hover {
+					background-color: #fff4;
+				}
+
+				&.selected {
+					background-color: #FF8A6580;
+				}
+			}
+
+			input {
+				border-radius: 0px;
+				border: none;
+				background-color: transparent;
+				min-width: auto !important;
+			}
+		}
+
+		.item-entry {
+			padding: 0px 5px;
+			display: grid;
+			grid-template-areas: "icon name amount";
+			grid-template-columns: fit-content(100%) auto 80px;
+			align-items: stretch;
+			justify-content: stretch;
 
 			&.hovered {
 				background-color: #fff4;
@@ -132,6 +159,29 @@ $headerH: 27px;
 			.amount {
 				grid-area: amount;
 				text-align: right;
+			}
+		}
+
+		.item-options {
+			display: grid;
+			align-items: stretch;
+			justify-content: stretch;
+		}
+
+		.confirm-option {
+			display: grid;
+			grid-template-columns: auto fit-content(100%) auto auto;
+			align-items: stretch;
+			justify-content: stretch;
+
+			
+			&.removing {
+				border-left: 5px solid #e57373;
+			}
+
+			input {
+				text-align: right;
+				margin: 0px;
 			}
 		}
 	}
