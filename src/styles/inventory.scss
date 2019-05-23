@@ -186,6 +186,62 @@ $headerH: 27px;
 		}
 	}
 
+	.trader {
+		h2 {
+			font-size: 1em;
+			padding: 10px 0px;
+			margin: 0px;
+		}
+		.neighbour-players {
+			border-collapse: collapse;
+			// display: inline-table;
+			width: 100%;
+
+			tr {
+				&:not(.chosen) {
+					cursor: pointer;
+
+					&:hover {
+						background-color: #B0BEC540;
+					}
+				}
+
+				&.chosen {
+					background-color: #4DB6AC80;
+				}
+
+				transition: background-color 0.3s ease-in-out;
+
+				th, td {
+					padding: 5px;
+
+					&:first-child {
+						text-align: right;
+						width: 40%;
+					}
+					&:last-child {
+						text-align: left;
+					}
+				}
+			}
+		}
+
+		input {
+			min-width: auto !important;
+			text-align: center;
+		}
+
+		button {
+			margin: 5px 0px;
+		}
+
+		.error-msg {
+			color: #ef9a9a;
+			font-weight: bold;
+			display: block;
+		}
+	}
+
 	footer {
 		padding: 3px;
 		font-size: 0.8em;

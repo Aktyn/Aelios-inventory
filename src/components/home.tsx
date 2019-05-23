@@ -1,4 +1,5 @@
 import React from 'react';
+import Trader from './trader';
 
 declare var alt: any;
 
@@ -20,7 +21,12 @@ function translateName(name: string) {
 	return name;
 }
 
-interface ItemSchema {
+export interface PlayerSchema {
+	id: number;
+	nick: string;
+}
+
+export interface ItemSchema {
 	id: number;
 	item_name: string;
 	amount: number;
@@ -41,6 +47,8 @@ interface HomeState {
 	selected_i: number;
 	selected_option_i?: number;
 	removing_id?: number;
+	trading_item?: ItemSchema;
+	neighbour_players: PlayerSchema[];
 }
 
 export default class Home extends React.Component<any, HomeState> {
@@ -50,6 +58,8 @@ export default class Home extends React.Component<any, HomeState> {
 	private centered = true;
 	private grabPos: {x: number, y: number} | null = null;
 
+	private available_categories: string[] = [];
+
 	state: HomeState = {
 		pos: {x: 0, y: 0},
 		category: Object.keys(CATEGORIES)[0],
@@ -57,7 +67,9 @@ export default class Home extends React.Component<any, HomeState> {
 		hovered_item_i: 0,
 		selected_i: -1,
 		selected_option_i: undefined,
-		removing_id: undefined
+		removing_id: undefined,
+		trading_item: undefined,
+		neighbour_players: []
 	}
 
 	constructor(props: any) {
@@ -80,7 +92,7 @@ export default class Home extends React.Component<any, HomeState> {
 					item_name: Object.keys(items_data)[i], 
 					amount: (Math.random()*10000)|0, 
 					usable: Math.random() > 0.5,
-					category_name: cats[(Math.random()*cats.length)|0]
+					category_name: cats[(Math.random()*cats.length-1)|0 + 1]
 				});
 			}
 			this.loadItems(arr);
@@ -98,29 +110,20 @@ export default class Home extends React.Component<any, HomeState> {
 						if(this.centered)
 							this.centerContainer();
 					}
-					else
+					else {
 						main_view.style.display = 'none';
+						this.setState({trading_item: undefined});
+					}
 				});
 
-				alt.on('loadItems', (items: ItemSchema[]) => {
-					this.loadItems(items);
-				});
+				alt.on('loadItems', this.loadItems.bind(this));
+
+				alt.on('openTrade', this.openTrade.bind(this));
 			}
 			catch(e) {
 				console.warn(e);
 			}
 		}
-	}
-
-	loadItems(items: ItemSchema[]) {
-		this.setState({items, selected_i: -1, selected_option_i: undefined});
-	}
-
-	confirmItemRemove(item: ItemSchema, amount: number) {//amount to remove
-		try {
-			alt.emit('onInventoryItemRemove', item, amount);
-		}
-		catch(e) {console.error(e);}
 	}
 
 	componentWillUnmount() {
@@ -129,13 +132,56 @@ export default class Home extends React.Component<any, HomeState> {
 		window.removeEventListener('keydown', this.onKeyDown.bind(this), true);
 	}
 
+	private loadItems(items: ItemSchema[]) {
+		this.available_categories = [];
+		for(let category_name of Object.keys(CATEGORIES)) {
+			if( items.some(item => item.category_name === category_name) )
+				this.available_categories.push(category_name);
+		}
+		if(this.available_categories.length > 1)//include all category
+			this.available_categories.splice(0, 0, Object.keys(CATEGORIES)[0]);
+		this.setState({items, selected_i: -1, selected_option_i: undefined});
+	}
+
+	private confirmItemRemove(item: ItemSchema, amount: number) {//amount to remove
+		try {
+			alt.emit('onInventoryItemRemove', item, amount);
+		}
+		catch(e) {console.error(e);}
+	}
+
+	private tryOpenTrade(item: ItemSchema) {
+		if(process.env.NODE_ENV === 'development') {
+			this.openTrade(//fake players array
+				[{id: 6, nick: 'Aktyn'}, {id: 9, nick: 'Uvuvuvue'}],
+				item
+			);
+		}
+		else {
+			try {
+				alt.emit('requestTrade', item);
+			}
+			catch(e) {console.error(e);}
+		}
+	}
+
+	private openTrade(players: PlayerSchema[], item: ItemSchema) {
+		this.setState({trading_item: item, neighbour_players: players});
+	}
+
 	componentDidUpdate() {
 		if(this.centered)
 			this.centerContainer();
 	}
 
-	onKeyDown(e: KeyboardEvent) {
+	private onKeyDown(e: KeyboardEvent) {
 		switch(e.keyCode) {
+			case 9: {//TAB
+				let next_cat_id = (this.available_categories.indexOf(this.state.category) + 1) % 
+					this.available_categories.length;
+				this.setState({category: this.available_categories[next_cat_id]});
+				e.preventDefault();
+			}	break;
 			case 38: //arrow up
 			case 40: {//arrow down
 				var new_hover_i = (this.state.hovered_item_i+(e.keyCode===38 ? -1 : 1));
@@ -166,8 +212,6 @@ export default class Home extends React.Component<any, HomeState> {
 						this.items_list.scrollTop = Math.min(this.items_list.scrollTop,
 							hovered.offsetTop - hovered.offsetHeight*1.5);
 					}
-					//console.log(this.items_list.scrollTop);
-					
 				}
 			}	break;
 			case 37://left
@@ -196,6 +240,9 @@ export default class Home extends React.Component<any, HomeState> {
 						option_i++;
 
 					switch (option_i) {
+						case 1:
+							this.tryOpenTrade(item);
+							break;
 						case 2:
 							this.setState({
 								removing_id: this.state.selected_i,
@@ -204,18 +251,21 @@ export default class Home extends React.Component<any, HomeState> {
 							break;
 					}
 				}
-				else
+				else {
 					this.setState({
 						selected_i: this.state.hovered_item_i, 
 						selected_option_i: 0,
-						removing_id: undefined
+						removing_id: undefined,
+						trading_item: undefined
 					});
+				}
 				break;
 			case 27://esc
 				this.setState({
-					selected_i: -1, 
+					selected_i: -1,
 					selected_option_i: undefined, 
-					removing_id: undefined
+					removing_id: undefined,
+					trading_item: undefined
 				});
 				break;
 		}
@@ -276,7 +326,12 @@ export default class Home extends React.Component<any, HomeState> {
 			icon = item_dt[1] || no_img;
 
 		if(this.state.selected_i === index) {
-			if(this.state.removing_id !== undefined) {
+			if(this.state.trading_item && this.state.neighbour_players.length === 0) {
+				return <div key={index}>
+					BRAK GRACZY W POBLIŻU
+				</div>;
+			}
+			else if(this.state.removing_id !== undefined) {
 				let option_i = this.state.selected_option_i !== undefined ? 
 					this.fixOptionI(item, this.state.selected_option_i, 2) : -1;
 				return <div className='confirm-option removing' key={index}>
@@ -302,7 +357,8 @@ export default class Home extends React.Component<any, HomeState> {
 				gridTemplateColumns: item.usable ? '1fr 1fr 1fr' : '1fr 1fr'
 			}} onMouseEnter={() => this.setState({hovered_item_i: index})} >
 				{item.usable && <button className={option_i === 0 ? 'selected': ''}>UŻYJ</button>}
-				<button className={option_i === 1 ? 'selected': ''}>PRZEKAŻ</button>
+				<button className={option_i === 1 ? 'selected': ''}
+					onClick={() => this.tryOpenTrade(item)}>PRZEKAŻ</button>
 				<button className={option_i === 2 ? 'selected': ''} 
 					onClick={() => this.setState({removing_id: index, 
 						selected_option_i: undefined})}>USUŃ</button>
@@ -315,7 +371,8 @@ export default class Home extends React.Component<any, HomeState> {
 				onClick={() => this.setState({
 					selected_i: index, 
 					selected_option_i: undefined,
-					removing_id: undefined
+					removing_id: undefined,
+					trading_item: undefined
 				})}>
 			<img className='icon' src={icon} onError={e => {
 				//@ts-ignore
@@ -343,27 +400,40 @@ export default class Home extends React.Component<any, HomeState> {
 					catch(e) {}
 				}}></button>
 			</header>
-			<nav className='categories' style={{
-				gridTemplateColumns: Object.keys(CATEGORIES).map(()=>'1fr').join(' ')
-			}}>
-				{Object.entries(CATEGORIES).map((entry, i) => {
-					let [cat, cat_name] = entry;
-					let current_cat = this.state.category === cat;
-					return <button key={i} className={current_cat ? 'current' : ''} 
-						onClick={() => this.setState({category: cat})}>{cat_name}</button>;
-				})}
-			</nav>
-			<div className='items-list' ref={el => this.items_list = el}>
-				{this.state.items.length === 0 ? 'PUSTO' : this.state.items.map((item, i) => {
-					if(this.state.category === item.category_name || 
-						this.state.category === Object.keys(CATEGORIES)[0])
-					{
-						return this.renderItemEntry(item, i);
-					}
-					else
-						return undefined;
-				})}
-			</div>
+			{this.state.trading_item ? <Trader onCancel={() => {
+				this.setState({trading_item: undefined, selected_i: -1});
+			}} onConfirm={(player: PlayerSchema, item: ItemSchema, amount: number) => {
+				try {
+					alt.emit('onTradeConfirm', player.id, item, amount);
+				}
+				catch(e) {}
+				this.setState({trading_item: undefined, selected_i: -1});
+			}} 	item={this.state.trading_item} 
+				players={this.state.neighbour_players} /> :
+				(this.available_categories.length > 1 && <nav className='categories' style={{
+					gridTemplateColumns: this.available_categories.map(()=>'1fr').join(' ')
+				}}>
+					{this.available_categories.map((cat, i) => {
+						let current_cat = this.state.category === cat;
+						return <button key={i} className={current_cat ? 'current' : ''} 
+							onClick={() => this.setState({category: cat})}>{
+								//@ts-ignore
+								CATEGORIES[cat]
+							}</button>;
+					})}
+				</nav>) ||
+				<div className='items-list' ref={el => this.items_list = el}>
+					{this.state.items.length === 0 ? 'PUSTO' : this.state.items.map((item, i) => {
+						if(this.state.category === item.category_name || 
+							this.state.category === Object.keys(CATEGORIES)[0])
+						{
+							return this.renderItemEntry(item, i);
+						}
+						else
+							return undefined;
+					})}
+				</div>
+			}
 			<footer>
 				<span>Ilość przedmiotów: {this.state.items.length}</span>
 			</footer>
