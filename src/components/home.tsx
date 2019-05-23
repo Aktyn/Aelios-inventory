@@ -153,7 +153,7 @@ export default class Home extends React.Component<any, HomeState> {
 	private tryOpenTrade(item: ItemSchema) {
 		if(process.env.NODE_ENV === 'development') {
 			this.openTrade(//fake players array
-				[{id: 6, nick: 'Aktyn'}, {id: 9, nick: 'Uvuvuvue'}],
+				[],
 				item
 			);
 		}
@@ -400,16 +400,18 @@ export default class Home extends React.Component<any, HomeState> {
 					catch(e) {}
 				}}></button>
 			</header>
-			{this.state.trading_item ? <Trader onCancel={() => {
-				this.setState({trading_item: undefined, selected_i: -1});
-			}} onConfirm={(player: PlayerSchema, item: ItemSchema, amount: number) => {
-				try {
-					alt.emit('onTradeConfirm', player.id, item, amount);
-				}
-				catch(e) {}
-				this.setState({trading_item: undefined, selected_i: -1});
-			}} 	item={this.state.trading_item} 
-				players={this.state.neighbour_players} /> :
+			{this.state.trading_item && this.state.neighbour_players.length > 0 ? 
+				<Trader onCancel={() => {
+					this.setState({trading_item: undefined, selected_i: -1});
+				}} onConfirm={(player: PlayerSchema, item: ItemSchema, amount: number) => {
+					try {
+						alt.emit('onTradeConfirm', player.id, item, amount);
+					}
+					catch(e) {}
+					this.setState({trading_item: undefined, selected_i: -1});
+				}} 	item={this.state.trading_item} 
+					players={this.state.neighbour_players} /> 
+				:
 				(this.available_categories.length > 1 && <nav className='categories' style={{
 					gridTemplateColumns: this.available_categories.map(()=>'1fr').join(' ')
 				}}>
