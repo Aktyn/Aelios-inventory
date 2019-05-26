@@ -18,7 +18,7 @@
 	"WEAPON_POOLCUE":		["Kij bilardowy", "poolcue.png"],
 	"WEAPON_STONE_HATCHET":	["Kamienna siekiera", "stone-hatchet.png"],
 	"WEAPON_PISTOL":		["Pistolet", "pistol.png"],
-	"WEAPON_PISTOL_MK2":	["Pistolek MK2", "pistol_mk2.png"],
+	"WEAPON_PISTOL_MK2":	["Pistolet MK2", "pistol_mk2.png"],
 	"WEAPON_COMBATPISTOL":	["Pistolet bojowy", "combatpistol.png"],
 	"WEAPON_APPISTOL":		["Ap Pistol", "appistol.png"],
 	"WEAPON_STUNGUN":		["Paralizator", "stungun.png"],

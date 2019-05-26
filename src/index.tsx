@@ -22,10 +22,4 @@ else {
 	catch(e) {}
 }
 
-//console.log(new Date(Date.now() + 1000*60*60*24*14), 
-//	new Date(Date.now() + 1000*60*60*24*14).getTime());
-if(Date.now() > 1559488910676)//02. june (17:21:50)
-	render(<div>Wersja próbna wygasła.<br/>Skontaktuj się z twórcą aplikacji</div>, 
-		document.getElementById('main_view'));
-else
-	render(<Home/>, document.getElementById('main_view'));
+render(<Home/>, document.getElementById('main_view'));
