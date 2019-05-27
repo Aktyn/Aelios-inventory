@@ -36,7 +36,8 @@ export interface ItemSchema {
 
 const CATEGORIES = {//dictionary
 	'ALL': 'WSZYSTKIE',
-	'WEAPONS': 'BRONIE'
+	'WEAPONS': 'BRONIE',
+	'FOODS': 'JEDZENIE'
 };
 
 interface HomeState {
@@ -86,13 +87,13 @@ export default class Home extends React.Component<any, HomeState> {
 		if(process.env.NODE_ENV === 'development') {
 			let cats = Object.keys(CATEGORIES);
 			let arr: ItemSchema[] = [];
-			for(let i=0; i<92; i++) {
+			for(let i=0; i<Object.keys(items_data).length; i++) {
 				arr.push({
 					id: i,
 					item_name: Object.keys(items_data)[i], 
 					amount: (Math.random()*10000)|0, 
 					usable: Math.random() > 0.5,
-					category_name: cats[(Math.random()*cats.length-1)|0 + 1]
+					category_name: cats[((Math.random()*(cats.length-1))|0) + 1]
 				});
 			}
 			this.loadItems(arr);
@@ -163,6 +164,13 @@ export default class Home extends React.Component<any, HomeState> {
 			}
 			catch(e) {console.error(e);}
 		}
+	}
+
+	private tryUse(item: ItemSchema) {
+		try {
+			alt.emit('requestItemUse', item);
+		}
+		catch(e) {console.error(e);}
 	}
 
 	private openTrade(players: PlayerSchema[], item: ItemSchema) {
@@ -240,6 +248,9 @@ export default class Home extends React.Component<any, HomeState> {
 						option_i++;
 
 					switch (option_i) {
+						case 0:
+							this.tryUse(item);
+							break;
 						case 1:
 							this.tryOpenTrade(item);
 							break;
@@ -356,7 +367,8 @@ export default class Home extends React.Component<any, HomeState> {
 			return <div key={index} className='item-options' style={{
 				gridTemplateColumns: item.usable ? '1fr 1fr 1fr' : '1fr 1fr'
 			}} onMouseEnter={() => this.setState({hovered_item_i: index})} >
-				{item.usable && <button className={option_i === 0 ? 'selected': ''}>UŻYJ</button>}
+				{item.usable && <button className={option_i === 0 ? 'selected': ''}
+					onClick={() => this.tryUse(item)}>UŻYJ</button>}
 				<button className={option_i === 1 ? 'selected': ''}
 					onClick={() => this.tryOpenTrade(item)}>PRZEKAŻ</button>
 				<button className={option_i === 2 ? 'selected': ''} 
@@ -412,29 +424,31 @@ export default class Home extends React.Component<any, HomeState> {
 				}} 	item={this.state.trading_item} 
 					players={this.state.neighbour_players} /> 
 				:
-				(this.available_categories.length > 1 && <nav className='categories' style={{
-					gridTemplateColumns: this.available_categories.map(()=>'1fr').join(' ')
-				}}>
-					{this.available_categories.map((cat, i) => {
-						let current_cat = this.state.category === cat;
-						return <button key={i} className={current_cat ? 'current' : ''} 
-							onClick={() => this.setState({category: cat})}>{
-								//@ts-ignore
-								CATEGORIES[cat]
-							}</button>;
-					})}
-				</nav>) ||
-				<div className='items-list' ref={el => this.items_list = el}>
-					{this.state.items.length === 0 ? 'PUSTO' : this.state.items.map((item, i) => {
-						if(this.state.category === item.category_name || 
-							this.state.category === Object.keys(CATEGORIES)[0])
-						{
-							return this.renderItemEntry(item, i);
-						}
-						else
-							return undefined;
-					})}
-				</div>
+				<>
+					{this.available_categories.length > 1 && <nav className='categories' style={{
+						gridTemplateColumns: this.available_categories.map(()=>'1fr').join(' ')
+					}}>
+						{this.available_categories.map((cat, i) => {
+							let current_cat = this.state.category === cat;
+							return <button key={i} className={current_cat ? 'current' : ''} 
+								onClick={() => this.setState({category: cat})}>{
+									//@ts-ignore
+									CATEGORIES[cat]
+								}</button>;
+						})}
+					</nav>}
+					<div className='items-list' ref={el => this.items_list = el}>
+						{this.state.items.length === 0 ? 'PUSTO' : this.state.items.map((item, i) => {
+							if(this.state.category === item.category_name || 
+								this.state.category === Object.keys(CATEGORIES)[0])
+							{
+								return this.renderItemEntry(item, i);
+							}
+							else
+								return undefined;
+						})}
+					</div>
+				</>
 			}
 			<footer>
 				<span>Ilość przedmiotów: {this.state.items.length}</span>

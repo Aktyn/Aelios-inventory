@@ -89,5 +89,13 @@
 	"WEAPON_FLARE":			["Flara", "flare.png"],
 	"WEAPON_PETROLCAN":		["Kanister", "jerry-can.png"],
 	"GADGET_PARACHUTE":		["Spadochron", "AM_Parachute.png"],
-	"WEAPON_FIREEXTINGUISHER":	["Gaśnica", "Fire_Extinguisher_GTASA.png"]
+	"WEAPON_FIREEXTINGUISHER":	["Gaśnica", "Fire_Extinguisher_GTASA.png"],
+	"RP_WATER": [
+        "Woda",
+        "water.png"
+    ],
+	"RP_BREAD": [
+        "Chleb",
+        "bread.png"
+    ]
 }
