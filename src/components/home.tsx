@@ -244,7 +244,7 @@ export default class Home extends React.Component<any, HomeState> {
 					}
 
 					let option_i = this.fixOptionI(item, this.state.selected_option_i);
-					if(!item.usable)
+					if(!item || !item.usable)
 						option_i++;
 
 					switch (option_i) {
@@ -321,7 +321,7 @@ export default class Home extends React.Component<any, HomeState> {
 
 	private fixOptionI(item: ItemSchema, i: number, divider?: number) {
 		if(divider === undefined)
-			divider = (item.usable ? 3 : 2);
+			divider = ((item && item.usable) ? 3 : 2);
 		let option_i = i % divider;
 		if(option_i < 0)
 			option_i = divider + option_i;
@@ -361,13 +361,13 @@ export default class Home extends React.Component<any, HomeState> {
 
 			let option_i = this.state.selected_option_i !== undefined ? 
 				this.fixOptionI(item, this.state.selected_option_i) : -1;
-			if(!item.usable)
+			if(!item || !item.usable)
 				option_i++;
 
 			return <div key={index} className='item-options' style={{
-				gridTemplateColumns: item.usable ? '1fr 1fr 1fr' : '1fr 1fr'
+				gridTemplateColumns: item && item.usable ? '1fr 1fr 1fr' : '1fr 1fr'
 			}} onMouseEnter={() => this.setState({hovered_item_i: index})} >
-				{item.usable && <button className={option_i === 0 ? 'selected': ''}
+				{item && item.usable && <button className={option_i === 0 ? 'selected': ''}
 					onClick={() => this.tryUse(item)}>UŻYJ</button>}
 				<button className={option_i === 1 ? 'selected': ''}
 					onClick={() => this.tryOpenTrade(item)}>PRZEKAŻ</button>
