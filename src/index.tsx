@@ -5,13 +5,11 @@ import './styles/main.scss';
 
 import Home from './components/home';
 
-const preview = require('./img/preview.png');
-
 if(process.env.NODE_ENV === 'development') {
 	let body = document.body;
 	if(body) {
 		body.style['background'] = process.env.NODE_ENV !== 'development' ? 
-			'transparent' : `url('${preview}') center no-repeat`;
+			'transparent' : `linear-gradient(60deg, #1d404a, #009688)`;
 	}
 }
 else {

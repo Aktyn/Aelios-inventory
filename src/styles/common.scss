@@ -22,20 +22,17 @@
 .error-msg {
 	margin-bottom: 10px;
 	color: #ef9a9a;
-	// font-weight: bold;
 
 	animation: pop-in 0.3s cubic-bezier(.36,.07,.19,.97);
 
 	@keyframes pop-in {
 		0% {
 			opacity: 0;
-			//transform: translateY(-20px) scale(0.5, 1);
 			transform: scaleX(4);
 		}
 		100% {
 			opacity: 1;
 			transform: scaleX(1);
-			//transform: translateY(0px) scale(1);
 		}
 	}
 }
